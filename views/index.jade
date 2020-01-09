@@ -1,5 +1,16 @@
 extends layout
 
+block scripts
+  script(src='/javascripts/home-client.js')
+
 block content
-  h1= title
-  p Welcome to #{title}
+  div(class='content-window content')
+    div(class='home-drawing-div')
+      img(title='drawing', src='/images/melony.png', class='drawing-home')
+    div(class='controls-grid')
+      input(class='controls-button', id="prev", value='prev     <<', type='button', onclick='prev()')
+      input(class="controls-button", id="random", value='random', type='button', onclick='random()')
+      input(class='controls-button', id="next", value='>>     next', type='button', onclick='next()')
+
+
+

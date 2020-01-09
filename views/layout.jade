@@ -1,7 +1,13 @@
 doctype html
 html
   head
-    title= title
+    title=title
+    block scripts
+    meta(charset='utf-8')
     link(rel='stylesheet', href='/stylesheets/style.css')
+    link(rel='icon', href='/images/favicon.ico')
   body
-    block content
+    div(class='drawvid-grid')
+      div(class='header-div header') #{title}
+      block content
+      div(class='box footer') footer
