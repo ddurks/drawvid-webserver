@@ -80,7 +80,7 @@ button {
 
 .controls-grid {
   display: grid;
-  grid-template-columns: 35% 10% 10% 10% 35%;
+  grid-template-columns: 10% 30% 20% 30% 10%;
 }
 
 .content-window {
