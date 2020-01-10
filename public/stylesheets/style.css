@@ -1,6 +1,26 @@
 body {
   margin: 50px;
-  background-color: whitesmoke;
+  background-color: white;
+}
+
+button {
+  background: #7C7C7C;
+  border-bottom: 6px inset rgba(0,0,0,.5);
+  border-left: 6px inset rgba(0,0,0,.5);
+  border-right: 6px inset rgba(255,255,255,.5);
+  border-top: 6px inset rgba(255,255,255,.5);
+  border-radius: 15px;
+  box-sizing: border-box;
+  color: grey;
+  font-weight: bolder;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 1rem;
+  margin: 1rem;
+  padding: .5rem;
+  min-width: 100px;
+  max-height: 50px;
+  width: auto;
 }
 
 .sidebar-left {
@@ -11,7 +31,7 @@ body {
   grid-area: content;
   display: grid;
   grid-gap: 5px;
-  grid-template-rows: 3fr 1fr;
+  grid-template-rows: 85% 15%;
   padding: 0;
 }
 
@@ -31,11 +51,10 @@ body {
   grid-template-columns: 40% 1fr 1fr 40%;
   padding: 0;
 }
-#twitter-logo {
+.twitter-logo {
   grid-column-start: 2;
-  height: 100%;
 }
-#instagram-logo {
+.instagram-logo {
   grid-column-start: 3;
 }
 .social-icon-img {
@@ -50,7 +69,7 @@ body {
   height: 90vh;
   display: grid;
   grid-gap: 5px;
-  grid-template-rows: 10% 75% 15%;
+  grid-template-rows: 10% 85% 15%;
   grid-template-areas:
     "header"
     "content"
@@ -61,7 +80,7 @@ body {
 
 .controls-grid {
   display: grid;
-  grid-template-columns: 30% 1fr 1fr 1fr 30%;
+  grid-template-columns: 35% 10% 10% 10% 35%;
 }
 
 .content-window {
@@ -97,14 +116,6 @@ body {
   font-size: 150%;
 }
 
-.controls-button {
-  color: black;
-  padding: 0.75em 1em;
-  border: none;
-  font-size: 150%;
-  border-radius: 15px; 
-  margin: 10px;
-}
 #prev {
   background-color: rgb(205, 220, 235);
   grid-column-start: 2;

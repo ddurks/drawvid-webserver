@@ -2,7 +2,7 @@ var express = require('express');
 var pg = require('pg');
 var conString = "postgres://drawvid:drawvid1@localhost:5432/postgres";
 var client = new pg.Client(conString);
-client.connect();
+//client.connect();
 
 var router = express.Router();
 
