@@ -1,16 +1,12 @@
-var current_post_number;
-var r_p;
-var current_drawing;
+var current_post_number = 0;
+var r_p = 100;
+var current_drawing = 0;
+
+const url = new URL("http://localhost:3000");
+const drawvid_posts_host = "https://drawvid-posts.s3.amazonaws.com/";
 
 function updatePage(current_drawing) {
-    document.getElementById('main-display').src = current_drawing.image;
-    if (current_drawing.text != null) {
-        document.getElementById('drawing-text').innerHTML = current_drawing.text;
-    } else {
-        document.getElementById('drawing-text').innerHTML = current_drawing.imagename;
-    }
-    var c_d = new Date(current_drawing.created_date);
-    document.getElementById('drawing-date').innerHTML = c_d.toLocaleString('en-us', { month: 'long' }) + ' ' + c_d.getUTCDay() + ', ' + c_d.getUTCFullYear();
+    document.getElementById('drawing-img').src = drawvid_posts_host + current_drawing.art_name.S;
 }
 
 window.onload = async () => {
@@ -19,6 +15,13 @@ window.onload = async () => {
 
 function latest() {
   console.log("latest");
+  const response = fetch(url + 'fetchpost?post=latest')
+  .then(response => response.json())
+  .then(data => {
+      console.log(data.drawing.art_name.S);
+      updatePage(data.drawing);
+  })
+  .catch(error => console.error(error));
 }
 
 // GET random post from DB
@@ -29,9 +32,25 @@ function random() {
 // GET prev post from db
 function prev() {
   console.log("prev");
+  if(current_drawing.num > 0) {
+    const response = fetch('fetchpost?post=' + current_drawing.num)
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+    })
+    .catch(error => console.error(error));
+  }
 }
 
 // GET next post from db
 function next() {
   console.log("next");
+  if(current_drawing.num < r_p) {
+    const response = fetch('fetchpost?post=' + current_drawing.num)
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+    })
+    .catch(error => console.error(error));
+  }
 }

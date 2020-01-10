@@ -26,14 +26,14 @@ router.get('/fetchpost', function(req, res, next) {
     TableName: 'drawvid-posts'
   };
 
-  res.json(await new Promise((resolve, reject) => {
+  new Promise((resolve, reject) => {
     ddb.scan(params, (error, data) => {
       if (error) {
         console.log(`ERROR=${error.stack}`);
         resolve(null);
   
       } else {
-        console.log(`data=${JSON.stringify(data)}`);
+        //console.log(`data=${JSON.stringify(data)}`);
         resolve(data.Items.length);
       }
     });
@@ -61,17 +61,16 @@ router.get('/fetchpost', function(req, res, next) {
         ddb.query(params, (error, data) => {
           if (error) {
             console.log(`ERROR=${error.stack}`);
-            resolve({ statusCode: 500, body: JSON.stringify(error) });
-      
+            res.send({ drawing: null });
           } else {
-            console.log(`data=${JSON.stringify(data)}`);
+            console.log(`POST=${JSON.stringify(data)}`);
             var drawing = data.Items[0];
-            resolve(drawing);
+            res.send({ drawing: drawing})
           }
         });
       })
     }
-  }));
+  });
 })
 
 module.exports = router;
