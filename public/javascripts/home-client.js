@@ -1,12 +1,12 @@
-var current_post_number = 0;
-var r_p = 100;
-var current_drawing = 0;
+var curr_post_id = 0;
+var latest_post_id = 0;
 
 const url = new URL("http://localhost:3000");
-const drawvid_posts_host = "https://drawvid-posts.s3.amazonaws.com/";
+const drawvid_posts_host = url + 'posts/';
 
 function updatePage(current_drawing) {
-    document.getElementById('drawing-img').src = drawvid_posts_host + current_drawing.art_name.S;
+  curr_post_id = current_drawing.id;
+  document.getElementById('drawing-img').src = drawvid_posts_host + current_drawing.image_name;
 }
 
 window.onload = async () => {
@@ -18,8 +18,9 @@ function latest() {
   const response = fetch(url + 'fetchpost?post=latest')
   .then(response => response.json())
   .then(data => {
-      console.log(data.drawing.art_name.S);
-      updatePage(data.drawing);
+      console.log(data.image_name);
+      latest_post_id = data.id;
+      updatePage(data);
   })
   .catch(error => console.error(error));
 }
@@ -27,16 +28,25 @@ function latest() {
 // GET random post from DB
 function random() {
   console.log("random");
+  const response = fetch('fetchpost?post=random')
+  .then(response => response.json())
+  .then(data => {
+      console.log(data);
+      updatePage(data);
+  })
+  .catch(error => console.error(error));
 }
 
 // GET prev post from db
 function prev() {
   console.log("prev");
-  if(current_drawing.num > 0) {
-    const response = fetch('fetchpost?post=' + current_drawing.num)
+  if(curr_post_id > 0) {
+    var prev_post_id = curr_post_id - 1;
+    const response = fetch('fetchpost?post=' + prev_post_id)
     .then(response => response.json())
     .then(data => {
         console.log(data);
+        updatePage(data);
     })
     .catch(error => console.error(error));
   }
@@ -45,11 +55,13 @@ function prev() {
 // GET next post from db
 function next() {
   console.log("next");
-  if(current_drawing.num < r_p) {
-    const response = fetch('fetchpost?post=' + current_drawing.num)
+  if(curr_post_id < latest_post_id) {
+    var next_post_id = curr_post_id + 1;
+    const response = fetch('fetchpost?post=' + next_post_id)
     .then(response => response.json())
     .then(data => {
         console.log(data);
+        updatePage(data);
     })
     .catch(error => console.error(error));
   }
