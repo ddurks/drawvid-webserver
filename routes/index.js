@@ -1,6 +1,7 @@
 var express = require('express');
 var pg = require('pg');
-var conString = "postgres://drawvid:drawvid1@localhost:5432/postgres";
+var conString = "postgres://" + dbConfig.user + ":" + dbConfig.password + "@localhost:" + dbConfig.port + "/" + dbConfig.database;
+
 var client = new pg.Client(conString);
 client.connect();
 

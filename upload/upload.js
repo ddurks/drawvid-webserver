@@ -1,6 +1,7 @@
 var fs = require('fs');
 var pg = require('pg');
-var conString = "postgres://drawvid:drawvid1@localhost:5432/postgres";
+var dbConfig = require('../constants')
+var conString = "postgres://" + dbConfig.user + ":" + dbConfig.password + "@" + dbConfig.host + ":" + dbConfig.port + "/" + dbConfig.database;
 var client = new pg.Client(conString);
 client.connect();
 
@@ -44,7 +45,7 @@ files.forEach(function(file) {
     if (fs.lstatSync(directoryPath + file).isFile()) {
       fileContents = fs.readFileSync(directoryPath + file);
       stats = fs.statSync(directoryPath + file);
-      //console.log(index, file, stats.birthtime.getTime());
+      console.log(index, file, stats.birthtime.getTime());
       loadDB(index, file, stats);
       index++;
     }
