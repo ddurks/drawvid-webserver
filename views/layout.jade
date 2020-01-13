@@ -6,11 +6,22 @@ html
     meta(charset='utf-8')
     link(rel='stylesheet', href='/stylesheets/style.css')
     link(rel='icon', href='/images/favicon.ico')
+    link(rel='stylesheet', href='//cdn.jsdelivr.net/npm/hack-font@3.3.0/build/web/hack-subset.css')
   body
     div(class='drawvid-grid')
-      div(class='header-div header') #{title}
-      block content
-      div(class='footer')
+      div(class='header-div header', id='site-title') #{title}
+        div(id='nav-grid', class='nav-menu')
+          button(id='home-button', onclick="location.href='/'")
+            a(href='/') home
+          button(id='gallery-button', onclick="location.href='/gallery'")
+            a(href='/gallery') gallery
+          button(id='archives-button', onclick="location.href='/archives'")
+            a(href='/archives') archives
+          button(id='about-button', onclick="location.href='/about'")
+            a(href='/about') about
+      div(class='content-window content')
+        block content
+      div(id='drawvid-footer',class='footer')
         a(class='twitter-logo', href='http://twitter.com/drawvid')
           img(border='0', alt='twitter', src='/images/twitter.png', class='social-icon-img')
         a(class='instagram-logo',href='https://www.instagram.com/drawvid')
