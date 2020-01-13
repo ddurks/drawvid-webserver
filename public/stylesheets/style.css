@@ -33,7 +33,7 @@ button {
   height: 90vh;
   display: grid;
   grid-gap: 5px;
-  grid-template-rows: 15% 85% 10%;
+  grid-template-rows: 10% 85% 5%;
   grid-template-areas:
     "header"
     "content"
@@ -44,8 +44,6 @@ button {
 
 .header {
   grid-area: header;
-  display: grid;
-  grid-template-rows: 60% 40%;
 }
 .header-div {
   color: black;
