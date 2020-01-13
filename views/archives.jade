@@ -1,0 +1,15 @@
+extends layout
+
+block scripts
+  script(src='/javascripts/archives-client.js')
+  link(rel='stylesheet', href='/stylesheets/modal.css')
+
+block content
+    div(class='archives-div') 
+      ul(id='archive-list', class='body-list')
+      
+    // The Modal
+    #myModal.modal
+      span.close &times;
+      img(id='modal-img', class='archivepost')
+      #caption
