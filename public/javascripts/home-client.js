@@ -11,6 +11,11 @@ function updatePage(current_drawing) {
 
 window.onload = async () => {
   latest();
+  // Get the <span> element that closes the modal
+  var span = document.getElementsByClassName("close")[0];
+
+  // When the user clicks on <span> (x), close the modal
+  span.setAttribute( "onClick", "closeModal()" );
 }
 
 function latest() {
@@ -65,4 +70,21 @@ function next() {
     })
     .catch(error => console.error(error));
   }
+}
+
+function showModal(poststring) { 
+  var modal = document.getElementById('myModal');
+  var modalImg = document.getElementById("modal-img");
+  var captionText = document.getElementById("caption");
+  console.log("got here");
+  modalImg.onload = function() {
+      modal.style.display = 'block';
+  }
+  modalImg.src = poststring;
+  captionText.innerHTML = poststring;
+}
+
+function closeModal() {
+  var modal = document.getElementById('myModal');
+  modal.style.display = "none";
 }

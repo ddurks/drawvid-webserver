@@ -1,8 +1,30 @@
 extends layout
 
 block scripts
-  script(src='/javascripts/archives-client.js')
+  script(src='/javascripts/gallery-client.js')
   link(rel='stylesheet', href='/stylesheets/modal.css')
 
 block content
-    div(class='gallery-div') working on it. stay tuned
+    div(class='gallery-div')
+      button(class='controls-button', id="prev", value='previous', type='button', onclick='prev_page()') previous
+      button(class="controls-button", id="random", value='random', type='button', onclick='shuffle()') shuffle
+      button(class='controls-button', id="next", value='next', type='button', onclick='next_page()') next
+      div(class='gallery-img', id='gallery-img0')    
+        img(id='g0', title='drawing', src='', class='drawing-home')
+      div(class='gallery-img', id='gallery-img1')
+        img(id='g1', title='drawing', src='', class='drawing-home')
+      div(class='gallery-img', id='gallery-img2')      
+        img(id='g2', title='drawing', src='', class='drawing-home')
+      div(class='gallery-img', id='gallery-img3')      
+        img(id='g3', title='drawing', src='', class='drawing-home')
+      div(class='gallery-img', id='gallery-img4')      
+        img(id='g4', title='drawing', src='', class='drawing-home')
+      div(class='gallery-img', id='gallery-img5')     
+        img(id='g5', title='drawing', src='', class='drawing-home')
+      div(class='gallery-img', id='gallery-img6')      
+        img(id='g6', title='drawing', src='', class='drawing-home')
+      div(class='gallery-img', id='gallery-img7')      
+        img(id='g7', title='drawing', src='', class='drawing-home')
+      div(class='gallery-img', id='gallery-img8')      
+        img(id='g8', title='drawing', src='', class='drawing-home')
+
