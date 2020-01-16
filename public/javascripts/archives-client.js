@@ -59,7 +59,7 @@ function makeList(array) {
     var list = document.getElementById('archive-list');
     document.getElementById('drawvid-footer').remove();
 
-    var year = '2019';
+    var year = new Date().getFullYear();
     var yearMarker = document.createElement('p');
     yearMarker.style.textDecoration = 'underline';
     yearMarker.appendChild(document.createTextNode(year));
