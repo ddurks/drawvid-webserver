@@ -1,5 +1,5 @@
 body {
-  margin: 50px;
+  margin: 25px;
   background-color: white;
   font-family: sans-serif;
 }
@@ -17,7 +17,7 @@ button {
   cursor: pointer;
   font-size: 1rem;
   min-width: 50px;
-  max-height: 3rem;
+  max-height: 2.5rem;
   width: auto;
 }
 
@@ -132,7 +132,7 @@ ul.body-list li a {
 
 .gallery-div {
   display: grid;
-  grid-template-columns: 20% 20% 20% 20% 20%;
+  grid-template-columns: 5% 30% 30% 30% 5%;
   grid-template-rows: 10% 30% 30% 30%;
 }
 #gallery-img0 {
