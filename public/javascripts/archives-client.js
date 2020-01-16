@@ -8,10 +8,7 @@ window.onload = async () => {
     })
     .catch(error => console.error(error));
 
-    // Get the <span> element that closes the modal
     var span = document.getElementsByClassName("close")[0];
-
-    // When the user clicks on <span> (x), close the modal
     span.setAttribute( "onClick", "closeModal()" );
 }
 

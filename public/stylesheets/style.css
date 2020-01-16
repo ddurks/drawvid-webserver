@@ -17,7 +17,7 @@ button {
   cursor: pointer;
   font-size: 1rem;
   min-width: 50px;
-  max-height: 40px;
+  max-height: 3rem;
   width: auto;
 }
 
@@ -56,7 +56,7 @@ button {
 }
 #nav-grid {
   display: grid;
-  grid-template-columns: 20% 15% 15% 15% 15% 20%;
+  grid-template-columns: 10% 20% 20% 20% 20% 10%;
   font-weight: bold;
   font-size: 80%;
 }
@@ -96,7 +96,7 @@ button {
 }
 .controls-grid {
   display: grid;
-  grid-template-columns: 10% 30% 20% 30% 10%;
+  grid-template-columns: 20% 20% 20% 20% 20%;
 }
 #prev {
   background-color: rgb(205, 220, 235);

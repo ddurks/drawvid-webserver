@@ -5,11 +5,15 @@ block scripts
   link(rel='stylesheet', href='/stylesheets/modal.css')
 
 block content
+    #myModal.modal
+      span.close &times;
+      img(id='modal-img', class='archivepost')
+      #caption
     div(class='gallery-div')
       button(class='controls-button', id="prev", value='previous', type='button', onclick='prev_page()') previous
       button(class="controls-button", id="random", value='random', type='button', onclick='shuffle()') shuffle
       button(class='controls-button', id="next", value='next', type='button', onclick='next_page()') next
-      div(class='gallery-img', id='gallery-img0')    
+      div(class='gallery-img', id='gallery-img0')  
         img(id='g0', title='drawing', src='', class='drawing-home')
       div(class='gallery-img', id='gallery-img1')
         img(id='g1', title='drawing', src='', class='drawing-home')

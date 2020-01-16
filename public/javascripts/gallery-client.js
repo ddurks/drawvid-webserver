@@ -1,5 +1,6 @@
+const DRAWINGS_PER_PAGE = 9;
 var minRange = 0;
-var maxRange = 9;
+var maxRange = DRAWINGS_PER_PAGE;
 var gallery_array = [];
 var posts_max = 0;
 
@@ -14,10 +15,7 @@ window.onload = async () => {
   })
   .catch(error => console.error(error));
 
-  // Get the <span> element that closes the modal
   var span = document.getElementsByClassName("close")[0];
-
-  // When the user clicks on <span> (x), close the modal
   span.setAttribute( "onClick", "closeModal()" );
 }
 
@@ -26,7 +24,7 @@ function makeGallery(array) {
 
   var galleryImg = null;
   for (var i = minRange; i < maxRange; i++) {
-    galleryImg = document.getElementById('g' + String(i%9));
+    galleryImg = document.getElementById('g' + String(i%DRAWINGS_PER_PAGE));
     if (i < posts_max) {
       if (array != null) {
         galleryImg.src = 'http://drawvid.com/posts/' + gallery_array[i].image_name;
@@ -36,6 +34,7 @@ function makeGallery(array) {
     } else {
       galleryImg.src = '';
     }
+    galleryImg.setAttribute( "onClick", "showModal(this.src)" );
   }
 
 }
@@ -50,9 +49,9 @@ function shuffle() {
 
 // GET prev post from db
 function prev_page() {
-  if(maxRange + 9 <= gallery_array.length) {
-    minRange+=9;
-    maxRange+=9;
+  if(maxRange + DRAWINGS_PER_PAGE <= gallery_array.length) {
+    minRange+=DRAWINGS_PER_PAGE;
+    maxRange+=DRAWINGS_PER_PAGE;
     console.log(minRange, maxRange);
     makeGallery(gallery_array);
   }
@@ -60,9 +59,9 @@ function prev_page() {
 
 // GET next post from db
 function next_page() {
-  if(minRange - 9 >= 0) {
-    minRange-=9;
-    maxRange-=9;
+  if(minRange - DRAWINGS_PER_PAGE >= 0) {
+    minRange-=DRAWINGS_PER_PAGE;
+    maxRange-=DRAWINGS_PER_PAGE;
     console.log(minRange, maxRange);
     makeGallery(gallery_array);
   }
@@ -72,26 +71,14 @@ function showModal(poststring) {
   var modal = document.getElementById('myModal');
   var modalImg = document.getElementById("modal-img");
   var captionText = document.getElementById("caption");
-  console.log("got here");
-  modalImg.onload = function() {
-      modal.style.display = 'block';
-  }
+  console.log(poststring);
   modalImg.src = poststring;
-  captionText.innerHTML = poststring;
+  console.log(modalImg.src);
+  modal.style.display = 'block';
+  captionText.innerHTML = poststring.substring(poststring.lastIndexOf('/') + 1);
 }
 
 function closeModal() {
   var modal = document.getElementById('myModal');
   modal.style.display = "none";
-}
-
-Element.prototype.remove = function() {
-  this.parentElement.removeChild(this);
-}
-NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
-  for(var i = this.length - 1; i >= 0; i--) {
-      if(this[i] && this[i].parentElement) {
-          this[i].parentElement.removeChild(this[i]);
-      }
-  }
 }
