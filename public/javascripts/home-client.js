@@ -1,7 +1,7 @@
 var curr_post_id = 0;
 var latest_post_id = 0;
 
-const url = new URL("http://localhost:3000");
+const url = "";
 const drawvid_posts_host = url + 'posts/';
 
 function updatePage(current_drawing) {
