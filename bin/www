@@ -7,7 +7,14 @@
 var app = require('../app');
 var debug = require('debug')('drawvid-webserver:server');
 var http = require('http');
+var https = require('https');
+var fs = require('fs');
 
+var options = {
+  key: fs.readFileSync('drawvid.key'),
+  cert: fs.readFileSync('drawvid_com.crt'),
+  ca: fs.readFileSync('drawvid_com.ca-bundle')
+};
 /**
  * Get port from environment and store in Express.
  */
@@ -36,6 +43,7 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
+https.createServer(options, app).listen(3001);
 /**
  * Normalize a port into a number, string, or false.
  */
