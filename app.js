@@ -18,6 +18,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/posts', express.static(path.join(__dirname, 'posts')));
+app.use('/onlinelounge', express.static(path.join(__dirname, 'onlinelounge')));
 app.use('/.well-known/pki-validation', express.static(path.join(__dirname, '.well-known/pki-validation')));
 app.use('/', indexRouter);
 // catch 404 and forward to error handler

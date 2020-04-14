@@ -57,7 +57,7 @@ function loadDB(num, file, stats) {
   });
 }
 
-var index = 0;
+var index = 110;
 files.forEach(function(file) {
   if (!file.startsWith(".",0)) {
     if (fs.lstatSync(directoryPath + file).isFile()) {
