@@ -43,7 +43,8 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
-https.createServer(options, app).listen(3001);
+var server2 = https.createServer(options, app).listen(3001);
+io.attach(server2);
 /**
  * Normalize a port into a number, string, or false.
  */
