@@ -395,41 +395,53 @@ io.on('connection', function(socket){
   });
   socket.on('message', function(message) {
     var player = lounge.players.get(socket.id);
-    console.log(player.id + ": " + message);
-    player.message = message;
-    player.message_timestamp = Utility.getTimestamp();
-    update_occurred = true;
+    if (player != null) {
+      console.log(player.id + ": " + message);
+      player.message = message;
+      player.message_timestamp = Utility.getTimestamp();
+      update_occurred = true;
+    }
   });
   socket.on('holding gun', function(holding_gun) {
     var player = lounge.players.get(socket.id);
-    console.log(player.id + " gun: " + holding_gun);
-    player.holding_gun = holding_gun;
-    update_occurred = true;
+    if (player != null) {
+      console.log(player.id + " gun: " + holding_gun);
+      player.holding_gun = holding_gun;
+      update_occurred = true;
+    }
   });
   socket.on('shot gun', function() {
     var player = lounge.players.get(socket.id);
-    if (player.holding_gun && player.bullets > 0 && player.username != "anonymous" && player.username != null && player.username != "") {
-      player.last_shot = Utility.getTimestamp();
-      player.bullets--;
-      player.score-=RELOAD_INTERVAL;
-      var newBullet = Bullet.create(player.posx + PLAYER_DIMENSION/2, player.posy + PLAYER_DIMENSION/2, player.direction);
-      newBullet.shot_by = player.id;
-      lounge.bullets.push(newBullet);
+    if (player != null) {
+      if (player.holding_gun && player.bullets > 0 && player.username != "anonymous" && player.username != null && player.username != "") {
+        player.last_shot = Utility.getTimestamp();
+        player.bullets--;
+        player.score-=RELOAD_INTERVAL;
+        var newBullet = Bullet.create(player.posx + PLAYER_DIMENSION/2, player.posy + PLAYER_DIMENSION/2, player.direction);
+        newBullet.shot_by = player.id;
+        lounge.bullets.push(newBullet);
+      }
     }
   });
   socket.on('secret reload', function() {
     var player = lounge.players.get(socket.id);
-    player.bullets+=5;
+    if (player != null) {
+      player.bullets+=5;
+    }
   });
   socket.on('holding beer', function(holding_beer) {
     var player = lounge.players.get(socket.id);
-    console.log(player.id + " beer: " + holding_beer);
-    player.holding_beer = holding_beer;
-    update_occurred = true;
+    if (player != null) {
+      console.log(player.id + " beer: " + holding_beer);
+      player.holding_beer = holding_beer;
+      update_occurred = true;
+    }
   });
   socket.on('bong hit', function(){
     var player = lounge.players.get(socket.id);
-    io.sockets.emit('bong hit', SmokePuff.create(player.posx, player.posy - PLAYER_DIMENSION/3));
+    if (player != null) {
+      io.sockets.emit('bong hit', SmokePuff.create(player.posx, player.posy - PLAYER_DIMENSION/3));
+    }
   });
   socket.on('disconnect', function(newPlayer) {
     lounge.players.delete(socket.id);
