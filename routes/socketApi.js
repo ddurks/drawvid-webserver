@@ -57,7 +57,7 @@ const Player = {
     player.speed = PLAYER_SPEED;
     player.message_timestamp = 0;
     player.score = 0;
-    player.bullets = 0;
+    player.bullets = 1;
     player.reload_timestamp = 0;
     return player;
   },
