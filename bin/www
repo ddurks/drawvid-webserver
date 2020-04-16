@@ -10,11 +10,15 @@ var http = require('http');
 var https = require('https');
 var fs = require('fs');
 
-var options = {
-  key: fs.readFileSync('drawvid.key'),
-  cert: fs.readFileSync('drawvid_com.crt'),
-  ca: fs.readFileSync('drawvid_com.ca-bundle')
-};
+var options = null
+if (fs.existsSync('drawvid.key')) {
+  var options = {
+    key: fs.readFileSync('drawvid.key'),
+    cert: fs.readFileSync('drawvid_com.crt'),
+    ca: fs.readFileSync('drawvid_com.ca-bundle')
+  };
+}
+
 /**
  * Get port from environment and store in Express.
  */
@@ -43,8 +47,10 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
-var server2 = https.createServer(options, app).listen(3001);
-io.attach(server2);
+if (options != null) {
+  var server2 = https.createServer(options, app).listen(3001);
+  io.attach(server2);
+}
 /**
  * Normalize a port into a number, string, or false.
  */

@@ -90,6 +90,10 @@
       var LOUNGE_DIV = document.getElementById('lounge-login-div');
       const RENDER_DELAY = 0.005;
       const PLAYER_SPEED = 6;
+      const BULLET_DIMENSION = 16;
+      const BULLET_SPEED = 250;
+      const FLASH_LENGTH = 0.20;
+      var mylatesttap = new Date().getTime();
       var socket = io({
         autoConnect: false
       });
@@ -154,6 +158,16 @@
           theta *= 180 / Math.PI; // rads to degs, range (-180, 180]
           //if (theta < 0) theta = 360 + theta; // range [0, 360)
           return theta;
+        },
+        doubletap: function() {
+          var doubletapdetected = false;
+          var now = new Date().getTime();
+          var timesince = now - mylatesttap;
+          if((timesince < 250) && (timesince > 0)){
+            doubletapdetected = true;
+          }
+          mylatesttap = new Date().getTime();
+          return doubletapdetected;
         }
       };
 
@@ -200,6 +214,10 @@
           player.scale = 1;
           player.holding_gun = false;
           player.holding_beer = false;
+          player.last_shot = 0;
+          player.last_bonghit = 0;
+          player.score = 0;
+          player.bullets = 0;
           return player;
         },
 
@@ -210,16 +228,49 @@
         },
       };
 
+      const Bullet = {
+        create: function(x, y, direction) {
+          var bullet = Object.create(this);
+          bullet.x = x;
+          bullet.y = y;
+          bullet.direction = direction;
+          bullet.speed = BULLET_SPEED;
+          return bullet;
+        }
+      };
+
+      const Bong = {
+        create: function(x, y) {
+          var bong = Object.create(this);
+          bong.x = x;
+          bong.y = y;
+          return bong;
+        }
+      };
+
+      const SmokePuff = {
+        create: function(x, y) {
+          var smoke = Object.create(this);
+          smoke.x = x;
+          smoke.y = y;
+          smoke.loop = [0,0,0,0,0,0,0,0,0,0, 1,1,1,1,1,1,1,1,1,1, 2,2,2,2,2,2,2,2,2,2, 3,3,3,3,3,3,3,3,3,3, 4,4,4,4,4,4,4,4,4,4, 5,5,5,5,5,5,5,5,5,5];
+          smoke.loop_i = 0;
+          return smoke;
+        }
+      }
+
       const Lounge = {
         player_1: null,
         players: [],
         furnitureList: new Array(),
+        smokePuffList: new Array(),
 
-        create: function(player_1_username) {
+        create: function(player_1_username) { 
           var lounge = Object.create(this);
           lounge.player_1 = Player.create(player_1_username, 1, 1);
           lounge.players.push(lounge.player_1);
           lounge.addFurniture();
+          lounge.bullets = new Array();
           return lounge;
         },
 
@@ -262,6 +313,8 @@
           this.furnitureList.push(right_dinner_chairs);
           var bottom_dinner_chair = Furniture.create("assets/bottom_dinner_chair.png", 128, 481, false);
           this.furnitureList.push(bottom_dinner_chair);
+          var bong = Bong.create(280, 117);
+          this.bong = bong;
         },
 
         canMoveHere: function(posx, posy) {
@@ -309,12 +362,54 @@
           }
         },
 
+        animateSmoke: function(smokepuff) {
+          if (smokepuff.loop_i < smokepuff.loop.length - 1) {
+            smokepuff.loop_i++;
+          }
+        },
+
         update_player: function(player, posx, posy, direction) {
           if (this.canMoveHere(posx, posy)) {
             player.posx = posx;
             player.posy = posy;
             player.direction = direction;
             this.animationFrame(player);
+          }
+        },
+
+        update_all_bullets: function(deltat) {
+          for(i=this.bullets.length-1; i >= 0; i--) {
+            this.update_bullet(this.bullets[i], deltat);
+            if (this.bullets[i].x < 0 || this.bullets[i].x > CANVAS_WIDTH || this.bullets[i].y < 0 || this.bullets[i].y > CANVAS_HEIGHT) {
+              this.bullets.splice(i, 1);
+            }
+          }
+        },
+
+        update_bullet: function(bullet, deltat) {
+          switch (bullet.direction) {
+            case 0: //down
+              bullet.y = bullet.y + bullet.speed*deltat;
+              break;
+            case 1: //right
+              bullet.x = bullet.x + bullet.speed*deltat;
+              break;
+            case 2: //up
+              bullet.y = bullet.y - bullet.speed*deltat;
+              break;
+            case 3: //left
+              bullet.x = bullet.x - bullet.speed*deltat;
+              break;
+          }
+        },
+
+        update_smokepuffs: function() {
+          for(i = this.smokePuffList.length-1; i>=0; i--) {
+            if (this.smokePuffList[i].loop_i === this.smokePuffList[i].loop.length-1) {
+              this.smokePuffList.splice(i, 1);
+            } else {
+              this.animateSmoke(this.smokePuffList[i]);
+            }
           }
         }
       }
@@ -327,12 +422,18 @@
         beer_image: new Image(),
         gun_spritesheet: new Image(),
         memescreen_img: new Image(),
+        bullet_img: new Image(),
+        flash_spritesheet: new Image(),
+        bong_img: new Image(),
+        smoke_img: new Image(),
         curr_timestamp: 0.0,
         prev_timestamp: 0.0,
         last_render_timestamp: 0.0,
         player_loaded: false,
         fps: 0,
         last_fps_ts: 0.0,
+        scores: [],
+        game_over: false,
 
         KeyState: {
           key: [0,0,0,0,0,0,0],
@@ -405,6 +506,10 @@
           }
           view.beer_image.src = 'assets/lounge_beer.png';
           view.gun_spritesheet.src = 'assets/lounge_gun_spritesheet.png';
+          view.bullet_img.src = 'assets/pleading_eyes_emoji.png';
+          view.flash_spritesheet.src = 'assets/gun_flash_spritesheet.png';
+          view.bong_img.src = 'assets/bong.png';
+          view.smoke_img.src = 'assets/smoke_spritesheet.png';
           view.memescreen_img.src = "https://s3.amazonaws.com/online-meme-board/meme.png";
           view.loginPopUp.src = "assets/online_lounge_login.png";
           LOUNGE_DIV.appendChild(view.loginPopUp);
@@ -462,6 +567,45 @@
           }
         },
 
+        handle_chat_command: function(command) {
+          switch (command) {
+            case "/gun":
+              if (!this.lounge.player_1.holding_gun) {
+                this.lounge.player_1.holding_gun = true;
+              } else {
+                this.lounge.player_1.holding_gun = false;
+              }
+              socket.emit('holding gun', this.lounge.player_1.holding_gun);
+              break;
+            case "/beer":
+              if (!this.lounge.player_1.holding_beer) {
+                this.lounge.player_1.holding_beer = true;
+              } else {
+                this.lounge.player_1.holding_beer = false;
+              }
+              socket.emit('holding beer', this.lounge.player_1.holding_beer);
+              break;
+            case "/smoke":
+              this.lounge.player_1.last_bonghit = Utility.getTimestamp();
+              var smokepuff = SmokePuff.create(this.lounge.player_1.posx, this.lounge.player_1.posy - PLAYER_DIMENSION/3);
+              this.lounge.smokePuffList.push(smokepuff);
+              socket.emit('bong hit');
+              break;
+            case "/$":
+              socket.emit('secret reload');
+              break;
+          }
+        },
+
+        handle_chat_message: function(message) {
+          if (message.startsWith("/")) {
+            this.handle_chat_command(message);
+          } else {
+            this.lounge.player_1.message = message;
+            socket.emit('message', this.lounge.player_1.message);
+          }
+        },
+
         getTouchPos: function(touchEvent) {
           var rect = this.canvas.getBoundingClientRect();
           return {
@@ -473,18 +617,43 @@
         render: function() {
           this.context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
           this.draw_all_furniture();
+          this.draw_all_bullets();
           this.draw_all_players();
+          this.draw_bong();
+          this.draw_smokepuffs();
+          this.draw_hiscores();
         },
         draw_text: function(message, x, y) {
           this.context.font = "15 px Arial";
           this.context.textAlign = "center";
           this.context.fillText(message, x, y)
         },
+        draw_hiscores: function() {
+          var y = 10;
+          var increment = 10;
+          this.draw_text("hi scores:", 78, y);
+          y+= increment*2;
+          for(i=this.scores.length-1; i >= 0; i--) {
+            this.draw_text(this.scores[i].name + " - " + this.scores[i].score, 78, y);
+            y+=increment;
+          }
+        },
         draw_username: function(player) {
           this.draw_text(player.username, player.posx + (PLAYER_DIMENSION/2), player.posy + PLAYER_DIMENSION + 10);
         },
+        draw_onlinetime: function(player) {
+          this.draw_text(parseInt(player.score, 10), player.posx + (PLAYER_DIMENSION/2), player.posy + PLAYER_DIMENSION + 20);
+        },
         draw_message: function(player){
           this.draw_text(player.message, player.posx + (PLAYER_DIMENSION/2), player.posy - 10);
+        },
+        draw_bong: function() {
+          this.context.drawImage(this.bong_img, this.lounge.bong.x, this.lounge.bong.y)
+        },
+        draw_smokepuffs: function() {
+          this.lounge.smokePuffList.forEach(function(smokepuff) {
+            this.context.drawImage(this.smoke_img, 0, smokepuff.loop[smokepuff.loop_i] * PLAYER_DIMENSION, PLAYER_DIMENSION, PLAYER_DIMENSION, smokepuff.x, smokepuff.y, PLAYER_DIMENSION, PLAYER_DIMENSION);
+          }.bind(this));
         },
         draw_beer: function(player) {
           switch (player.direction) {
@@ -512,9 +681,39 @@
               break;
           }
         },
+        shoot_bullet: function() {
+          if (this.lounge.player_1.holding_gun && this.lounge.player_1.bullets > 0 && this.lounge.player_1.username != "anonymous" && this.lounge.player_1.username != null && this.lounge.player_1.username != "") {
+            this.lounge.player_1.last_shot = Utility.getTimestamp();
+            var newBullet = Bullet.create(this.lounge.player_1.posx + PLAYER_DIMENSION/2, this.lounge.player_1.posy + PLAYER_DIMENSION/2, this.lounge.player_1.direction);
+            newBullet.shot_by = this.lounge.player_1.id;
+            this.lounge.bullets.push(newBullet);
+            socket.emit('shot gun');
+          }
+        },
+        draw_flash: function(player) {
+          switch (player.direction) {
+            case 0:
+              this.context.drawImage(this.flash_spritesheet, 0, player.direction * (PLAYER_DIMENSION/2), (PLAYER_DIMENSION/2), (PLAYER_DIMENSION/2), player.posx - 5, player.posy + (PLAYER_DIMENSION/2) - 10, (PLAYER_DIMENSION/2) * player.scale, (PLAYER_DIMENSION/2) * player.scale);
+              break;
+            case 1:
+              this.context.drawImage(this.flash_spritesheet, 0, player.direction * (PLAYER_DIMENSION/2), (PLAYER_DIMENSION/2), (PLAYER_DIMENSION/2), player.posx + PLAYER_DIMENSION - 5 + PLAYER_DIMENSION/2, player.posy + (PLAYER_DIMENSION/2) - 7, (PLAYER_DIMENSION/2) * player.scale, (PLAYER_DIMENSION/2) * player.scale);
+              break;
+            case 3: 
+              this.context.drawImage(this.flash_spritesheet, 0, player.direction * (PLAYER_DIMENSION/2), (PLAYER_DIMENSION/2), (PLAYER_DIMENSION/2), player.posx - (PLAYER_DIMENSION/2) * player.scale + 5 - PLAYER_DIMENSION/2, player.posy + (PLAYER_DIMENSION/2) - 7, (PLAYER_DIMENSION/2) * player.scale, (PLAYER_DIMENSION/2) * player.scale);
+              break;
+          }
+        },
+        draw_bullet: function(bullet) {
+          this.context.drawImage(this.bullet_img, bullet.x, bullet.y, BULLET_DIMENSION, BULLET_DIMENSION);
+        },
+        draw_all_bullets: function() {
+          for(i=0; i < this.lounge.bullets.length; i++) {
+            this.draw_bullet(this.lounge.bullets[i]);
+          }
+        },
         draw_memescreen: function() {
           this.context.drawImage(this.memescreen_img, 384, 0, 96, 96);
-          this.context.drawImage(this.loginPopUp, 32, 0, 96, 96);
+          //this.context.drawImage(this.loginPopUp, 32, 0, 96, 96);
         },
         draw_player_frame: function(player, frameX, frameY, canvasX, canvasY) {
           this.context.drawImage(this.player_image, frameX * PLAYER_DIMENSION, frameY * PLAYER_DIMENSION, PLAYER_DIMENSION, PLAYER_DIMENSION, canvasX, canvasY, PLAYER_DIMENSION * player.scale, PLAYER_DIMENSION * player.scale);
@@ -522,6 +721,7 @@
         draw_player: function(player) {
           this.draw_player_frame(player, player.loop[player.loop_i], player.direction, player.posx, player.posy);
           this.draw_username(player);
+          //this.draw_onlinetime(player);
         },
         draw_all_players: function() {
           for (i = 0; i < this.lounge.players.length; i++) {
@@ -563,29 +763,42 @@
         },
 
         step: function() {
-          this.prev_timestamp = this.curr_timestamp;
-          this.curr_timestamp = Utility.getTimestamp();
+          if (!this.game_over) {
+            this.prev_timestamp = this.curr_timestamp;
+            this.curr_timestamp = Utility.getTimestamp();
 
-          if(this.player_loaded) {
-            this.handle_player_input();
+            if(this.player_loaded) {
+              this.handle_player_input();
+              var deltat = this.curr_timestamp - this.prev_timestamp;
+              this.lounge.update_all_bullets(deltat);
 
-            var render_deltat = Utility.getTimestamp() - this.last_render_timestamp;
-            if(render_deltat > RENDER_DELAY) {
-              this.render();
-              this.fps++;
-              this.last_render_timestamp = Utility.getTimestamp();
+              var render_deltat = Utility.getTimestamp() - this.last_render_timestamp;
+              if(render_deltat > RENDER_DELAY) {
+                this.lounge.update_smokepuffs();
+                this.render();
+                var last_shot_deltat = Utility.getTimestamp() - this.lounge.player_1.last_shot;
+                if (last_shot_deltat < FLASH_LENGTH) {
+                  this.draw_flash(this.lounge.player_1);
+                }
+                this.fps++;
+                this.last_render_timestamp = Utility.getTimestamp();
+              }
+
+              var fps_deltat = Utility.getTimestamp() - this.last_fps_ts;
+              if(fps_deltat > 1) {
+                //console.log(this.fps);
+                this.fps = 0;
+                this.last_fps_ts = Utility.getTimestamp();
+              }
             }
-            var fps_deltat = Utility.getTimestamp() - this.last_fps_ts;
-            if(fps_deltat > 1) {
-              //console.log(this.fps);
-              this.fps = 0;
-              this.last_fps_ts = Utility.getTimestamp();
-            }
+            
+            window.requestAnimationFrame(function() {
+              this.step();
+            }.bind(this));
+          } else {
+            this.context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            this.draw_text("you've been digitally murdered, reload the page to rejoin", CANVAS_WIDTH/2, CANVAS_HEIGHT/2);
           }
-          
-          window.requestAnimationFrame(function() {
-            this.step();
-          }.bind(this));
         },
 
         init_game_loop: function() {
@@ -594,38 +807,31 @@
           this.last_fps_ts = timestamp;
           window.addEventListener('keydown', function(e) {
             this.KeyState.changeKey(e.keyCode, 1);
-            if(this.KeyState.key[5]){
-              if (!this.lounge.player_1.holding_gun) {
-                this.lounge.player_1.holding_gun = true;
-              } else {
-                this.lounge.player_1.holding_gun = false;
-              }
-              socket.emit('holding gun', this.lounge.player_1.holding_gun);
-            }
-            if(this.KeyState.key[6]){
-              if (!this.lounge.player_1.holding_beer) {
-                this.lounge.player_1.holding_beer = true;
-              } else {
-                this.lounge.player_1.holding_beer = false;
-              }
-              socket.emit('holding beer', this.lounge.player_1.holding_beer);
-            }       
+            if (e.keyCode == 32) {
+              console.log("shoot gun");
+              this.shoot_bullet();
+            }      
           }.bind(this));
           window.addEventListener('keyup', function(e) { 
             this.KeyState.changeKey(e.keyCode, 0);
           }.bind(this));
           if (IS_MOBILE) {
             window.addEventListener('touchstart', function(e) {
-              var touch = this.getTouchPos(e);
-              console.log(touch);
-              if (touch.x < 0) {
-                touch.x = 0;
+              if (Utility.doubletap()) {
+                console.log("shoot gun");
+                this.shoot_bullet();
+              } else {
+                var touch = this.getTouchPos(e);
+                console.log(touch);
+                if (touch.x < 0) {
+                  touch.x = 0;
+                }
+                if (touch.y > CANVAS_HEIGHT) {
+                  touch.y = CANVAS_HEIGHT;
+                }
+                var angle = Utility.getAngle(this.lounge.player_1.posx + PLAYER_DIMENSION/2, this.lounge.player_1.posy + PLAYER_DIMENSION/2, touch.x, touch.y);
+                this.KeyState.keyFromAngle(angle);
               }
-              if (touch.y > CANVAS_HEIGHT) {
-                touch.y = CANVAS_HEIGHT;
-              }
-              var angle = Utility.getAngle(this.lounge.player_1.posx + PLAYER_DIMENSION/2, this.lounge.player_1.posy + PLAYER_DIMENSION/2, touch.x, touch.y);
-              this.KeyState.keyFromAngle(angle);
             }.bind(this), false);
             window.addEventListener('touchmove', function(e) {
               preventDefault(e);
@@ -679,16 +885,38 @@
               } 
             }
           }.bind(this));
+          socket.on('bullets', function(serverBullets) {
+            if (serverBullets.length < this.lounge.bullets.length) {
+              this.lounge.bullets = serverBullets;
+            }
+            for (i = 0; i < serverBullets.length; i++) {
+              if (i < this.lounge.bullets.length) {
+                this.lounge.bullets[i] = serverBullets[i];
+              } else {
+                this.lounge.bullets.push(serverBullets[i]);
+              } 
+            }
+          }.bind(this));
+          socket.on('player killed', function(id) {
+            if (id === this.lounge.player_1.id) {
+              socket.disconnect();
+              this.game_over = true;
+            }
+          }.bind(this));
+          socket.on('bong hit', function(smokepuff) {
+            this.lounge.smokePuffList.push(smokepuff);
+          }.bind(this));
+          socket.on('scoreboard update', function(scores) {
+            this.scores = scores;
+          }.bind(this));
           DOCUMENT.getElementById("chat-button").onclick = function() {
             if (!IS_MOBILE) {
               DOCUMENT.getElementById("chat-area").style.opacity = 1;
               DOCUMENT.getElementById("chat-button").style.display = 'none';
               DOCUMENT.getElementById("sendit-button").style.display = 'block';
             } else {
-              this.lounge.player_1.message = window.prompt("chat message:");
-              if (this.lounge.player_1.message != null) {
-                socket.emit('message', this.lounge.player_1.message);
-              }
+              var msg = window.prompt("chat message:");
+              this.handle_chat_message(msg);
             }
           }.bind(this);
           DOCUMENT.getElementById("sendit-button").onclick = function() {
@@ -697,8 +925,8 @@
               DOCUMENT.getElementById("chat-button").style.display = 'block';
               DOCUMENT.getElementById("chat-area").style.opacity = 0;
             } 
-            this.lounge.player_1.message = DOCUMENT.getElementById("chat-area").value;
-            socket.emit('message', this.lounge.player_1.message);
+            var msg = DOCUMENT.getElementById("chat-area").value;
+            this.handle_chat_message(msg);
           }.bind(this);
           this.init_game_loop();
         },
