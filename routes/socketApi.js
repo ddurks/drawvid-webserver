@@ -280,14 +280,16 @@ const Lounge = {
                 p.posy + (2*PLAYER_DIMENSION/3) < b.y + BULLET_DIMENSION &&
                 p.posy + PLAYER_DIMENSION > b.y) {
                 var killer = this.players.get(b.shot_by);
-                killer.score+=p.score;
-                this.bullets.splice(i, 1);
-                this.players.delete(p.id);
-                console.log("player " + p.id + " shot by " + killer.id);
-                io.sockets.emit('state', Array.from(this.players.values()));
-                io.sockets.emit('player killed', p.id);
-                io.sockets.emit('bullets', this.bullets);
-                return;
+                if (killer != null) {
+                  killer.score+=p.score;
+                  this.bullets.splice(i, 1);
+                  this.players.delete(p.id);
+                  console.log("player " + p.id + " shot by " + killer.id);
+                  io.sockets.emit('state', Array.from(this.players.values()));
+                  io.sockets.emit('player killed', p.id);
+                  io.sockets.emit('bullets', this.bullets);
+                  return;
+                }
             }
           }
         }
