@@ -358,27 +358,35 @@ io.on('connection', function(socket){
     var newPos = null;
     if(keyArray[2]){ // up
       player = lounge.players.get(socket.id);
-      newPos = Player.create(player.username, player.posx, player.posy - player.speed, 2);
-      player.direction = 2;
-      animationFrame(player);
+      if (player != null) {
+        newPos = Player.create(player.username, player.posx, player.posy - player.speed, 2);
+        player.direction = 2;
+        animationFrame(player);
+      }
     }
     if(keyArray[3]){ // down
       player = lounge.players.get(socket.id);
-      newPos = Player.create(player.username, player.posx, player.posy + player.speed, 0);
-      player.direction = 0;
-      animationFrame(player);
+      if (player != null) {
+        newPos = Player.create(player.username, player.posx, player.posy + player.speed, 0);
+        player.direction = 0;
+        animationFrame(player);
+      }
     }
     if(keyArray[0]){ // left
       player = lounge.players.get(socket.id);
-      newPos = Player.create(player.username, player.posx - player.speed, player.posy, 3);
-      player.direction = 3;
-      animationFrame(player);
+      if (player != null) {
+        newPos = Player.create(player.username, player.posx - player.speed, player.posy, 3);
+        player.direction = 3;
+        animationFrame(player);
+      }
     }
     if(keyArray[1]){ // right
       player = lounge.players.get(socket.id);
-      newPos = Player.create(player.username, player.posx + player.speed, player.posy, 1);
-      player.direction = 1;
-      animationFrame(player);
+      if (player != null) {
+        newPos = Player.create(player.username, player.posx + player.speed, player.posy, 1);
+        player.direction = 1;
+        animationFrame(player);
+      }
     }
     if(newPos != null && !checkFurnitureCollisions(newPos)) {
       update_player(player, newPos.posx, newPos.posy, newPos.direction);
