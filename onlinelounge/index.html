@@ -232,7 +232,11 @@
       const Bullet = {
         create: function(x, y, direction) {
           var bullet = Object.create(this);
-          bullet.x = x;
+          if (direction === 0) {
+            bullet.x = x - PLAYER_DIMENSION/2;
+          } else {
+            bullet.x = x;
+          }
           bullet.y = y;
           bullet.direction = direction;
           bullet.speed = BULLET_SPEED;

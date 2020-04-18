@@ -67,7 +67,11 @@ const Player = {
 const Bullet = {
   create: function(x, y, direction) {
     var bullet = Object.create(this);
-    bullet.x = x;
+    if (direction === 0) {
+      bullet.x = x - PLAYER_DIMENSION/2;
+    } else {
+      bullet.x = x;
+    }
     bullet.y = y;
     bullet.direction = direction;
     bullet.speed = BULLET_SPEED;
@@ -449,7 +453,7 @@ io.on('connection', function(socket){
   socket.on('disconnect', function(newPlayer) {
     lounge.players.delete(socket.id);
     console.log("player left. players: " + lounge.players.size);
-    update_occurred = true;
+    io.sockets.emit('state', [Array.from(lounge.players.values())]);
   });
 });
 
