@@ -1,6 +1,5 @@
 var socket_io = require('socket.io');
 var sizeOf = require('image-size');
-var nodemailer = require('nodemailer');
 var constants = require('../constants');
 var io = socket_io();
 var socketApi = {};
@@ -21,20 +20,6 @@ const Utility = {
     return Date.now() / 1000.0;
   }
 }
-var transporter = nodemailer.createTransport({
-  service: constants.mailConfig.service,
-  auth: {
-    user: constants.mailConfig.username,
-    pass: constants.mailConfig.password
-  }
-});
-
-var mailOptions = {
-  from: 'the online lounge',
-  to: constants.mailConfig.toAddress,
-  subject: "Important Lounge Update",
-  text: 'Unknown'
-};
 
 const Furniture = {
   create: function(image_src, posx, posy, isBlocking) {
@@ -369,14 +354,6 @@ io.on('connection', function(socket){
     console.log("new player: " + newPlayer.id);
     console.log("total players: " + lounge.players.size);
     io.sockets.emit('scoreboard update', lounge.scoreboard.scores);
-    // mailOptions.text = newPlayer.username + " has entered the online lounge.";
-    // transporter.sendMail(mailOptions, function(error, info){
-    //   if (error) {
-    //     console.log(error);
-    //   } else {
-    //     console.log('Email sent: ' + info.response);
-    //   }
-    // });
     update_occurred = true;
   });
   socket.on('update player', function(keyArray) {
