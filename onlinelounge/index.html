@@ -213,7 +213,7 @@
           player.message_timestamp = 0;
           player.scale = 1;
           player.holding_gun = false;
-          player.holding_beer = false;
+          player.holding_item = null;
           player.last_shot = 0;
           player.last_bonghit = 0;
           player.score = 0;
@@ -426,6 +426,8 @@
         flash_spritesheet: new Image(),
         bong_img: new Image(),
         smoke_img: new Image(),
+        pizza_img: new Image(),
+        controller_img: new Image(),
         ragnarok: new Image(),
         curr_timestamp: 0.0,
         prev_timestamp: 0.0,
@@ -434,6 +436,7 @@
         fps: 0,
         last_fps_ts: 0.0,
         scores: [],
+        killed_by: "none",
         game_over: false,
 
         KeyState: {
@@ -511,6 +514,8 @@
           view.flash_spritesheet.src = 'assets/gun_flash_spritesheet.png';
           view.bong_img.src = 'assets/bong.png';
           view.smoke_img.src = 'assets/smoke_spritesheet.png';
+          view.pizza_img.src = 'assets/pizza.png';
+          view.controller_img.src = 'assets/controller.png';
           view.memescreen_img.src = "https://s3.amazonaws.com/online-meme-board/meme.png";
           view.loginPopUp.src = "assets/online_lounge_login.png";
           view.ragnarok.src = "assets/ragnarok.png";
@@ -580,12 +585,28 @@
               socket.emit('holding gun', this.lounge.player_1.holding_gun);
               break;
             case "/beer":
-              if (!this.lounge.player_1.holding_beer) {
-                this.lounge.player_1.holding_beer = true;
+              if (this.lounge.player_1.holding_item === null || this.lounge.player_1.holding_item != "beer") {
+                this.lounge.player_1.holding_item = "beer";
               } else {
-                this.lounge.player_1.holding_beer = false;
+                this.lounge.player_1.holding_item = null;
               }
-              socket.emit('holding beer', this.lounge.player_1.holding_beer);
+              socket.emit('holding item', this.lounge.player_1.holding_item);
+              break;
+            case "/pizza":
+              if (this.lounge.player_1.holding_item === null || this.lounge.player_1.holding_item != "pizza") {
+                this.lounge.player_1.holding_item = "pizza";
+              } else {
+                this.lounge.player_1.holding_item = null;
+              }
+              socket.emit('holding item', this.lounge.player_1.holding_item);
+              break;
+            case "/controller":
+              if (this.lounge.player_1.holding_item === null || this.lounge.player_1.holding_item != "controller") {
+                this.lounge.player_1.holding_item = "controller";
+              } else {
+                this.lounge.player_1.holding_item = null;
+              }
+              socket.emit('holding item', this.lounge.player_1.holding_item);
               break;
             case "/smoke":
               this.lounge.player_1.last_bonghit = Utility.getTimestamp();
@@ -657,17 +678,31 @@
             this.context.drawImage(this.smoke_img, 0, smokepuff.loop[smokepuff.loop_i] * PLAYER_DIMENSION, PLAYER_DIMENSION, PLAYER_DIMENSION, smokepuff.x, smokepuff.y, PLAYER_DIMENSION, PLAYER_DIMENSION);
           }.bind(this));
         },
-        draw_beer: function(player) {
-          switch (player.direction) {
-            case 0:
-              this.context.drawImage(this.beer_image, 0, 0, (PLAYER_DIMENSION/2), (PLAYER_DIMENSION/2), player.posx + (PLAYER_DIMENSION/2) + 2, player.posy + (PLAYER_DIMENSION/2) - 3, (PLAYER_DIMENSION/2) * player.scale, (PLAYER_DIMENSION/2) * player.scale);
+        draw_item: function(player) {
+          var image = null;
+          switch (player.holding_item) {
+            case "beer":
+              image = this.beer_image;
               break;
-            case 1:
-              this.context.drawImage(this.beer_image, 0, 0, (PLAYER_DIMENSION/2), (PLAYER_DIMENSION/2), player.posx + PLAYER_DIMENSION - 5, player.posy + (PLAYER_DIMENSION/2) - 5, (PLAYER_DIMENSION/2) * player.scale, (PLAYER_DIMENSION/2) * player.scale);
+            case "pizza": 
+              image = this.pizza_img;
               break;
-            case 3: 
-              this.context.drawImage(this.beer_image, 0, 0, (PLAYER_DIMENSION/2), (PLAYER_DIMENSION/2), player.posx - (PLAYER_DIMENSION/2) * player.scale + 5, player.posy + (PLAYER_DIMENSION/2) - 5, (PLAYER_DIMENSION/2) * player.scale, (PLAYER_DIMENSION/2) * player.scale);
+            case "controller":
+              image = this.controller_img;
               break;
+          }
+          if (image != null) {
+            switch (player.direction) {
+              case 0:
+                this.context.drawImage(image, 0, 0, (PLAYER_DIMENSION/2), (PLAYER_DIMENSION/2), player.posx + (PLAYER_DIMENSION/2) + 2, player.posy + (PLAYER_DIMENSION/2) - 3, (PLAYER_DIMENSION/2) * player.scale, (PLAYER_DIMENSION/2) * player.scale);
+                break;
+              case 1:
+                this.context.drawImage(image, 0, 0, (PLAYER_DIMENSION/2), (PLAYER_DIMENSION/2), player.posx + PLAYER_DIMENSION - 5, player.posy + (PLAYER_DIMENSION/2) - 5, (PLAYER_DIMENSION/2) * player.scale, (PLAYER_DIMENSION/2) * player.scale);
+                break;
+              case 3: 
+                this.context.drawImage(image, 0, 0, (PLAYER_DIMENSION/2), (PLAYER_DIMENSION/2), player.posx - (PLAYER_DIMENSION/2) * player.scale + 5, player.posy + (PLAYER_DIMENSION/2) - 5, (PLAYER_DIMENSION/2) * player.scale, (PLAYER_DIMENSION/2) * player.scale);
+                break;
+            }
           }
         },
         draw_gun: function(player) {
@@ -734,8 +769,8 @@
             if (this.lounge.players[i].holding_gun) {
               this.draw_gun(this.lounge.players[i]);
             }
-            if (this.lounge.players[i].holding_beer) {
-              this.draw_beer(this.lounge.players[i]);
+            if (this.lounge.players[i].holding_item!=null) {
+              this.draw_item(this.lounge.players[i]);
             }
           } 
         },
@@ -799,7 +834,7 @@
             }.bind(this));
           } else {
             this.context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            this.draw_text("you've been digitally murdered, reload the page to rejoin", CANVAS_WIDTH/2, CANVAS_HEIGHT/2);
+            this.draw_text("you've been digitally murdered by " + this.killed_by + ", reload the page to rejoin", CANVAS_WIDTH/2, CANVAS_HEIGHT/2);
           }
         },
 
@@ -899,9 +934,10 @@
               } 
             }
           }.bind(this));
-          socket.on('player killed', function(id) {
-            if (id === this.lounge.player_1.id) {
+          socket.on('player killed', function(killInfo) {
+            if (killInfo.killed === this.lounge.player_1.id) {
               socket.disconnect();
+              this.killed_by = killInfo.killer;
               this.game_over = true;
             }
           }.bind(this));
