@@ -453,7 +453,7 @@ io.on('connection', function(socket){
   socket.on('disconnect', function(newPlayer) {
     lounge.players.delete(socket.id);
     console.log("player left. players: " + lounge.players.size);
-    io.sockets.emit('state', [Array.from(lounge.players.values())]);
+    io.sockets.emit('state', Array.from(lounge.players.values()));
   });
 });
 

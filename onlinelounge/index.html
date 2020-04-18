@@ -782,9 +782,11 @@
           this.context.drawImage(this.player_image, frameX * PLAYER_DIMENSION, frameY * PLAYER_DIMENSION, PLAYER_DIMENSION, PLAYER_DIMENSION, canvasX, canvasY, PLAYER_DIMENSION * player.scale, PLAYER_DIMENSION * player.scale);
         },
         draw_player: function(player) {
-          this.draw_player_frame(player, player.loop[player.loop_i], player.direction, player.posx, player.posy);
-          this.draw_username(player);
-          //this.draw_onlinetime(player);
+          if (player != []) {
+            this.draw_player_frame(player, player.loop[player.loop_i], player.direction, player.posx, player.posy);
+            this.draw_username(player);
+            //this.draw_onlinetime(player);
+          }
         },
         draw_all_players: function() {
           for (i = 0; i < this.lounge.players.length; i++) {
