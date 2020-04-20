@@ -637,8 +637,8 @@
               this.lounge.smokePuffList.push(smokepuff);
               socket.emit('bong hit');
               break;
-            case "/$":
-              socket.emit('secret reload');
+            case "/$wag":
+              socket.emit('swag');
               break;
           }
         },
@@ -1018,7 +1018,7 @@
         gameController.player = new YT.Player('player', {
           height: parseInt(canvas.style.height, 10)/6,
           width: parseInt(canvas.style.width, 10)/3,
-          videoId: 'ue80QwXMRHg',
+          videoId: '5qap5aO4i9A',
           events: {
             'onReady': onPlayerReady,
           }

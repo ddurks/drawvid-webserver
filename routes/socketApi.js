@@ -430,7 +430,7 @@ io.on('connection', function(socket){
       }
     }
   });
-  socket.on('secret reload', function() {
+  socket.on('swag', function() {
     var player = lounge.players.get(socket.id);
     if (player != null) {
       player.bullets+=5;
