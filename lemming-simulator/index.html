@@ -732,15 +732,15 @@
           if(this.sim.game_over) {
             this.context.globalAlpha = 0.50;
           }
-          if(this.sim.player != null) {
-            this.draw_lemming(this.sim.player);
-            this.draw_playermarker()
-          }
           this.sim.lemmings.forEach( function(lemming) {
             if(!lemming.dead) {
               this.draw_lemming(lemming);
             }
           }.bind(this));
+          if(this.sim.player != null) {
+            this.draw_lemming(this.sim.player);
+            this.draw_playermarker()
+          }
           if(this.sim.game_over) {
             this.context.globalAlpha = 1.0;
           }
