@@ -74,7 +74,8 @@
         d: 68,
         space: 32,
         arrowleft: 37,
-        arrowright: 39
+        arrowright: 39,
+        arrowup: 38
       }
 
       var IS_MOBILE;
@@ -611,7 +612,9 @@
 
         draw_bg: function() {
           this.context.drawImage(this.bg_img, this.sim.bg.x, this.sim.bg.y)
-          this.draw_text(this.sim.lemmings.length, 440, 62, 40);
+          if (!this.game_over) {
+            this.draw_text(this.sim.lemmings.length, 440, 62, 40);
+          }  
           this.draw_clouds();
           this.draw_ripples();
           this.context.drawImage(this.cliff_img, this.sim.cliff.x, this.sim.cliff.y);
@@ -849,7 +852,7 @@
           this.hiscore = 0;
           window.addEventListener('keydown', function(e) {
             this.KeyState.changeKey(e.keyCode, 1);
-            if(e.keyCode == KEY_CODES.space) {
+            if(e.keyCode == KEY_CODES.space || e.keyCode === KEY_CODES.w || e.keyCode === KEY_CODES.arrowup) {
               if(!!this.sim.player && !this.sim.player.dead){
                 this.sim.player.jump();
               }
