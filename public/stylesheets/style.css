@@ -58,7 +58,7 @@ button {
 }
 #nav-grid {
   display: grid;
-  grid-template-columns: 10% 20% 20% 20% 20% 10%;
+  grid-template-columns: 10% 20% 10% 10% 20% 20% 10%;
   font-weight: bold;
   font-size: 80%;
 }
@@ -71,8 +71,11 @@ button {
 #archives-button {
   grid-column-start: 4;
 }
-#about-button {
+#software-button {
   grid-column-start: 5;
+}
+#about-button {
+  grid-column-start: 6;
 }
 .nav-menu {
   font-size: 75%;

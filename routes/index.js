@@ -22,6 +22,11 @@ router.get('/about', function(req, res, next) {
   res.render('about', { title: 'drawvid.com: about' });
 });
 
+/* GET software page. */
+router.get('/software', function(req, res, next) {
+  res.render('software', { title: 'drawvid.com: software' });
+});
+
 /* GET archives page. */
 router.get('/archives', function(req, res, next) {
   res.render('archives', { title: 'drawvid.com: archives' });
