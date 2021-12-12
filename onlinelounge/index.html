@@ -73,7 +73,7 @@
         height: 200px;
       }
     </style>
-    <script src="https://drawvid.com/onlinelounge/socket.io/socket.io.js"></script>
+    <!-- <script src="socket.io/socket.io.js"></script> -->
 	</head>
 	<body>
     <div id="player"></div>
@@ -95,9 +95,9 @@
       const FLASH_LENGTH = 0.20;
       const SPECTATE = false;
       var mylatesttap = new Date().getTime();
-      var socket = io({
-        autoConnect: false
-      });
+      // var socket = io({
+      //   autoConnect: false
+      // });
       var PLAYER_DIMENSION = 32;
 
       var IS_MOBILE;
@@ -597,7 +597,7 @@
               } else {
                 this.lounge.player_1.holding_gun = false;
               }
-              socket.emit('holding gun', this.lounge.player_1.holding_gun);
+              // socket.emit('holding gun', this.lounge.player_1.holding_gun);
               break;
             case "/beer":
               if (this.lounge.player_1.holding_item === null || this.lounge.player_1.holding_item != "beer") {
@@ -605,7 +605,7 @@
               } else {
                 this.lounge.player_1.holding_item = null;
               }
-              socket.emit('holding item', this.lounge.player_1.holding_item);
+              // socket.emit('holding item', this.lounge.player_1.holding_item);
               break;
             case "/pizza":
               if (this.lounge.player_1.holding_item === null || this.lounge.player_1.holding_item != "pizza") {
@@ -613,7 +613,7 @@
               } else {
                 this.lounge.player_1.holding_item = null;
               }
-              socket.emit('holding item', this.lounge.player_1.holding_item);
+              // socket.emit('holding item', this.lounge.player_1.holding_item);
               break;
             case "/water":
                 if (this.lounge.player_1.holding_item === null || this.lounge.player_1.holding_item != "water") {
@@ -621,7 +621,7 @@
                 } else {
                   this.lounge.player_1.holding_item = null;
                 }
-                socket.emit('holding item', this.lounge.player_1.holding_item);
+                // socket.emit('holding item', this.lounge.player_1.holding_item);
               break;
               case "/controller":
               if (this.lounge.player_1.holding_item === null || this.lounge.player_1.holding_item != "controller") {
@@ -629,16 +629,16 @@
               } else {
                 this.lounge.player_1.holding_item = null;
               }
-              socket.emit('holding item', this.lounge.player_1.holding_item);
+              // socket.emit('holding item', this.lounge.player_1.holding_item);
               break;
             case "/smoke":
               this.lounge.player_1.last_bonghit = Utility.getTimestamp();
               var smokepuff = SmokePuff.create(this.lounge.player_1.posx, this.lounge.player_1.posy - PLAYER_DIMENSION/3);
               this.lounge.smokePuffList.push(smokepuff);
-              socket.emit('bong hit');
+              // socket.emit('bong hit');
               break;
             case "/$wag":
-              socket.emit('swag');
+              // socket.emit('swag');
               break;
           }
         },
@@ -648,7 +648,7 @@
             this.handle_chat_command(message);
           } else {
             this.lounge.player_1.message = message;
-            socket.emit('message', this.lounge.player_1.message);
+            // socket.emit('message', this.lounge.player_1.message);
           }
         },
 
@@ -750,7 +750,7 @@
             var newBullet = Bullet.create(this.lounge.player_1.posx + PLAYER_DIMENSION/2, this.lounge.player_1.posy + PLAYER_DIMENSION/2, this.lounge.player_1.direction);
             newBullet.shot_by = this.lounge.player_1.id;
             this.lounge.bullets.push(newBullet);
-            socket.emit('shot gun');
+            // socket.emit('shot gun');
           }
         },
         draw_flash: function(player) {
@@ -775,7 +775,7 @@
           }
         },
         draw_memescreen: function() {
-          this.context.drawImage(this.memescreen_img, 352, 0, 160, 160);
+          // this.context.drawImage(this.memescreen_img, 352, 0, 160, 160);
           this.context.drawImage(this.ragnarok, 325, 355, 120, 110);
         },
         draw_player_frame: function(player, frameX, frameY, canvasX, canvasY) {
@@ -922,63 +922,63 @@
         },
 
         start: function() {
-          var socketConnection = socket.connect();
-          socket.on('lounge full', function() {
-            alert(":( the lounge is currently full\ntry again later :)");
-          });
-          socketConnection.on('connect', function(){
-            const sessionID = socketConnection.id;
-            console.log("connected: " + sessionID);
-            this.lounge.player_1.id = sessionID;
-            if (!SPECTATE) {
-              socket.emit('new player', this.lounge.player_1);
-            } else {
-              this.lounge.players.splice(0, 1);
-            }
-          }.bind(this));
-          setInterval(function() {
-            socket.emit('update player', this.KeyState.key);
-          }.bind(this), 1000 / 60);
-          socket.on('state', function(serverPlayers) {
-            if (serverPlayers.length < this.lounge.players.length) {
-              this.lounge.players = serverPlayers;
-            }
-            for (i = 0; i < serverPlayers.length; i++) {
-              if (serverPlayers[i].id === this.lounge.player_1.id) {
-                this.lounge.player_1 = serverPlayers[i];
-              }
-              if (i < this.lounge.players.length) {
-                this.lounge.players[i] = serverPlayers[i];
-              } else {
-                this.lounge.players.push(serverPlayers[i]);
-              } 
-            }
-          }.bind(this));
-          socket.on('bullets', function(serverBullets) {
-            if (serverBullets.length < this.lounge.bullets.length) {
-              this.lounge.bullets = serverBullets;
-            }
-            for (i = 0; i < serverBullets.length; i++) {
-              if (i < this.lounge.bullets.length) {
-                this.lounge.bullets[i] = serverBullets[i];
-              } else {
-                this.lounge.bullets.push(serverBullets[i]);
-              } 
-            }
-          }.bind(this));
-          socket.on('player killed', function(killInfo) {
-            if (killInfo.killed === this.lounge.player_1.id) {
-              socket.disconnect();
-              this.killed_by = killInfo.killer;
-              this.game_over = true;
-            }
-          }.bind(this));
-          socket.on('bong hit', function(smokepuff) {
-            this.lounge.smokePuffList.push(smokepuff);
-          }.bind(this));
-          socket.on('scoreboard update', function(scores) {
-            this.scores = scores;
-          }.bind(this));
+          // var socketConnection = socket.connect();
+          // socket.on('lounge full', function() {
+          //   alert(":( the lounge is currently full\ntry again later :)");
+          // });
+          // socketConnection.on('connect', function(){
+          //   const sessionID = socketConnection.id;
+          //   console.log("connected: " + sessionID);
+          //   this.lounge.player_1.id = sessionID;
+          //   if (!SPECTATE) {
+          //     socket.emit('new player', this.lounge.player_1);
+          //   } else {
+          //     this.lounge.players.splice(0, 1);
+          //   }
+          // }.bind(this));
+          // setInterval(function() {
+          //   socket.emit('update player', this.KeyState.key);
+          // }.bind(this), 1000 / 60);
+          // socket.on('state', function(serverPlayers) {
+          //   if (serverPlayers.length < this.lounge.players.length) {
+          //     this.lounge.players = serverPlayers;
+          //   }
+          //   for (i = 0; i < serverPlayers.length; i++) {
+          //     if (serverPlayers[i].id === this.lounge.player_1.id) {
+          //       this.lounge.player_1 = serverPlayers[i];
+          //     }
+          //     if (i < this.lounge.players.length) {
+          //       this.lounge.players[i] = serverPlayers[i];
+          //     } else {
+          //       this.lounge.players.push(serverPlayers[i]);
+          //     } 
+          //   }
+          // }.bind(this));
+          // socket.on('bullets', function(serverBullets) {
+          //   if (serverBullets.length < this.lounge.bullets.length) {
+          //     this.lounge.bullets = serverBullets;
+          //   }
+          //   for (i = 0; i < serverBullets.length; i++) {
+          //     if (i < this.lounge.bullets.length) {
+          //       this.lounge.bullets[i] = serverBullets[i];
+          //     } else {
+          //       this.lounge.bullets.push(serverBullets[i]);
+          //     } 
+          //   }
+          // }.bind(this));
+          // socket.on('player killed', function(killInfo) {
+          //   if (killInfo.killed === this.lounge.player_1.id) {
+          //     socket.disconnect();
+          //     this.killed_by = killInfo.killer;
+          //     this.game_over = true;
+          //   }
+          // }.bind(this));
+          // socket.on('bong hit', function(smokepuff) {
+          //   this.lounge.smokePuffList.push(smokepuff);
+          // }.bind(this));
+          // socket.on('scoreboard update', function(scores) {
+          //   this.scores = scores;
+          // }.bind(this));
           DOCUMENT.getElementById("chat-button").onclick = function() {
             if (!IS_MOBILE) {
               DOCUMENT.getElementById("chat-area").style.opacity = 1;
